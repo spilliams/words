@@ -1,23 +1,10 @@
-// Copyright © 2018 NAME HERE <EMAIL ADDRESS>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package cmd
 
 import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spilliams/words/util"
 )
 
 // clueCmd represents the clue command
@@ -30,21 +17,57 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("clue called")
-	},
+	RunE: clue,
 }
+
+var length int
+var fill, set string
 
 func init() {
 	RootCmd.AddCommand(clueCmd)
 
-	// Here you will define your flags and configuration settings.
+	clueCmd.Flags().IntVarP(&length, "length", "l", -1, "The length of the desired word.")
+	clueCmd.Flags().StringVarP(&fill, "fill", "f", "", "The partially-filled in word, using spaces for unknown letters.")
+	clueCmd.Flags().StringVarP(&set, "set", "s", "", "The set of letters available. Note: they won't repeat usage.")
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// clueCmd.PersistentFlags().String("foo", "", "A help for foo")
+func clue(cmd *cobra.Command, args []string) error {
+	fmt.Println("clue command called")
+	if length == -1 && len(fill) == 0 && len(set) == 0 {
+		return fmt.Errorf("You must provide a value for at least one of: length, fill, set")
+	}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// clueCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	count := 0
+	for _, word := range util.Words {
+
+		// if word length correct
+		ok := true
+		if length != -1 && len(word) != length {
+			ok = false
+		}
+
+		// if word match fill
+		if len(fill) != 0 {
+			if len(word) != len(fill) {
+				ok = false
+			} else {
+				for i := 0; i < len(fill); i++ {
+					if fill[i:i+1] != " " && word[i:i+1] != fill[i:i+1] {
+						ok = false
+					}
+				}
+			}
+
+		}
+
+		// if word match set
+		// TODO
+
+		if ok {
+			count++
+			fmt.Println(word)
+		}
+	}
+	fmt.Printf("%v matching words\n", count)
+	return nil
 }
