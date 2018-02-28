@@ -32,7 +32,6 @@ func init() {
 }
 
 func clue(cmd *cobra.Command, args []string) error {
-	fmt.Println("clue command called")
 	if length == -1 && len(fill) == 0 && len(set) == 0 {
 		return fmt.Errorf("You must provide a value for at least one of: length, fill, set")
 	}
@@ -48,20 +47,17 @@ func clue(cmd *cobra.Command, args []string) error {
 
 		// if word match fill
 		if len(fill) != 0 {
-			if len(word) != len(fill) {
+			if !util.WordMatchesFill(word, fill) {
 				ok = false
-			} else {
-				for i := 0; i < len(fill); i++ {
-					if fill[i:i+1] != " " && word[i:i+1] != fill[i:i+1] {
-						ok = false
-					}
-				}
 			}
-
 		}
 
 		// if word match set
-		// TODO
+		if len(set) != 0 {
+			if !util.WordMatchesSet(word, set) {
+				ok = false
+			}
+		}
 
 		if ok {
 			count++
