@@ -20,13 +20,15 @@ to quickly create a Cobra application.`,
 	RunE: clue,
 }
 
-var length int
+var length, minLength, maxLength int
 var fill, set string
 
 func init() {
 	RootCmd.AddCommand(clueCmd)
 
 	clueCmd.Flags().IntVarP(&length, "length", "l", -1, "The length of the desired word.")
+	clueCmd.Flags().IntVarP(&minLength, "min", "", -1, "The minimum length of the desired word.")
+	clueCmd.Flags().IntVarP(&maxLength, "max", "", -1, "The maximum length of the desired word.")
 	clueCmd.Flags().StringVarP(&fill, "fill", "f", "", "The partially-filled in word, using spaces for unknown letters.")
 	clueCmd.Flags().StringVarP(&set, "set", "s", "", "The set of letters available. Note: they won't repeat usage.")
 }
@@ -39,9 +41,16 @@ func clue(cmd *cobra.Command, args []string) error {
 	count := 0
 	for _, word := range util.Words {
 
-		// if word length correct
 		ok := true
+
+		// if word length correct
 		if length != -1 && len(word) != length {
+			ok = false
+		}
+		if minLength != -1 && len(word) < minLength {
+			ok = false
+		}
+		if maxLength != -1 && len(word) > maxLength {
 			ok = false
 		}
 
