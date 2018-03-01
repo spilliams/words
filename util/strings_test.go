@@ -22,10 +22,13 @@ func TestNormalizeString(t *testing.T) {
 }
 
 func TestWordMatchesSet(t *testing.T) {
-	if !WordMatchesSet("style", "elyts") {
+	if !WordMatchesSet("style", "elyts", false) {
 		t.Errorf("word style should match set elyts")
 	}
-	if !WordMatchesSet("style", "styleeeee") {
+	if !WordMatchesSet("style", "styleeeee", false) {
 		t.Errorf("word should match set that has more letters")
+	}
+	if WordMatchesSet("sits", "tis", false) {
+		t.Errorf("word should not match set with reused letters")
 	}
 }

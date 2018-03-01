@@ -24,8 +24,9 @@ func WordMatchesFill(word, fill string) bool {
 }
 
 // WordMatchesSet determines if a word can be built with a given set of characters
-func WordMatchesSet(word, set string) bool {
+func WordMatchesSet(word, set string, reuse bool) bool {
 	split := strings.Split(set, "")
+	// fmt.Printf("word %v matches set %v reuse %v\n", word, set, reuse)
 	// for each letter in the word
 	for _, c := range word {
 		// is the letter in the set?
@@ -33,7 +34,9 @@ func WordMatchesSet(word, set string) bool {
 		for j := range split {
 			if split[j] == string(c) {
 				found = true
-				split, _ = ArrayRemove(split, j)
+				if !reuse {
+					split, _ = ArrayRemove(split, j)
+				}
 				break
 			}
 		}
