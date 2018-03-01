@@ -2,14 +2,17 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"strings"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/spilliams/words/util"
 )
 
-var cfgFile string
+var cfgFile, dictionary string
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -38,14 +41,8 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.words.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.words.yaml)")
+	RootCmd.PersistentFlags().StringVarP(&dictionary, "dictionary", "d", "", "dictionary file to use. Separate words with line-breaks.")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -72,4 +69,28 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+// Words returns the set of words this command uses
+func Words() []string {
+	words := util.Words()
+
+	// load the dictionary file, if given
+	if len(dictionary) != 0 {
+		bytes, err := ioutil.ReadFile(dictionary)
+		if err != nil {
+			fmt.Printf("Error reading dictionary file %v: %v\n", dictionary, err)
+			fmt.Println("Using included dictionary instead")
+			return words
+		}
+		words = strings.Split(string(bytes), "\n")
+	}
+
+	// make sure there are no blanks or dupes
+	words = append(words, "")
+	words = util.ArrayUnique(words)
+	words = words[:len(words)-1]
+
+	fmt.Printf("Loaded dictionary of %v words\n", len(words))
+	return words
 }
