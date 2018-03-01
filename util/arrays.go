@@ -6,6 +6,7 @@ func ArrayRemove(a []string, i int) ([]string, string) {
 	return a[:len(a)-1], a[len(a)-1]
 }
 
+// ArrayUnique returns an array with only unique values in it
 func ArrayUnique(a []string) []string {
 	keys := make(map[string]bool)
 	list := []string{}
